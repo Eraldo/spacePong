@@ -1,21 +1,27 @@
 
 function init()
    game = {
+      w = love.graphics.getWidth(),
+      h = love.graphics.getHeight(),
       
       counter = 0,
       
       paddle1 = {
+         nr = 1,
          w = 20,
          h = 80,
          x = 20,
-         y = 0,
+         y = 60,
          speed = 400,
          color = {255, 0, 0, 255},
          upKey = 'w',
          downKey = 's',
+         leftKey = 'a',
+         rightKey = 'd',
       },
       
       paddle2 = {
+         nr = 2,
          w = 20,
          h = 80,
          x = love.graphics.getWidth() - 40,
@@ -24,17 +30,22 @@ function init()
          color = {0, 0, 255, 255},
          upKey = 'up',
          downKey = 'down',
+         leftKey = 'left',
+         rightKey = 'right',
       },
       
       ball = {
          r = 20,
-         x = 100,
-         y = 100,
-         speed = 200,
+         x = love.graphics.getWidth() / 2,
+         y = love.graphics.getHeight() / 2,
+         speed = {
+            x = 100,
+            y = 100,
+         },
          color = {0, 255, 0, 255},
          dir = {
-            x = 1,
-            y = 1,
+            x = -1,
+            y = -1,
          },
       },
       
@@ -60,26 +71,59 @@ function updatePaddle(dt, paddle)
    if love.keyboard.isDown( paddle.upKey )
    then
       movePaddle(dt, paddle, 'up')
-   elseif
+   end
+   if
       love.keyboard.isDown( paddle.downKey )
    then
       movePaddle(dt, paddle, 'down')
+   end
+   if
+      love.keyboard.isDown( paddle.leftKey )
+   then
+      movePaddle(dt, paddle, 'left')
+   end
+   if
+      love.keyboard.isDown( paddle.rightKey )
+   then
+      movePaddle(dt, paddle, 'right')
    end
    
 end
 
 function movePaddle(dt, paddle, dir)
-   local shift = 0
+   local shiftX = 0
+   local shiftY = 0
    
    if dir == 'up'
    then
-      shift = -(paddle.speed * dt)
+      shiftY = -(paddle.speed * dt)
    elseif dir == 'down'
    then
-      shift = paddle.speed * dt
+      shiftY = paddle.speed * dt
+   elseif dir == 'left'
+   then
+      shiftX = -(paddle.speed * dt)
+   elseif dir == 'right'
+   then
+      shiftX = paddle.speed * dt
    end
-   
-   paddle.y = (paddle.y + shift) % (love.graphics.getHeight() - paddle.h)
+
+   -- new pos y
+   paddle.y = (paddle.y + shiftY) % (game.h - paddle.h)
+
+   -- new pos x
+   if (paddle.nr == 1 
+       and paddle.x + shiftX >= 0 
+       and paddle.x + shiftX <= game.w / 2 - paddle.w)
+   then
+      paddle.x = paddle.x + shiftX
+   elseif (paddle.nr == 2 
+           and paddle.x + shiftX >= game.w / 2
+           and paddle.x + shiftX <= game.w - paddle.w)
+   then
+      paddle.x = paddle.x + shiftX
+   end
+
 end
 
 function updateBall(dt, ball)
@@ -87,33 +131,12 @@ function updateBall(dt, ball)
    local shiftX = 0
    local shiftY = 0
    
-   shiftX = ball.dir.x * (ball.speed * dt)
-   shiftY = ball.dir.y * (ball.speed * dt)
+   shiftX = ball.dir.x * (ball.speed.x * dt)
+   shiftY = ball.dir.y * (ball.speed.y * dt)
 
-   -- wall collision (left|right)
-   if (ball.x >= love.graphics.getWidth() or ball.x <= 0)
-   then
-      init()
-   end
+   checkWallCollision(ball, shiftX, shiftY)
    
-   -- wall collision (up|down)
-   if (ball.y + shiftY - ball.r <= 0 or ball.y + shiftY + ball.r >= love.graphics.getHeight())
-   then
-      ball.dir.y = -ball.dir.y
-   else
-      ball.y = ball.y + shiftY
-   end
-   
-   -- collision with paddle1
-   if (ball.x + shiftX - ball.r <= game.paddle1.x + game.paddle1.w
-       and ball.y >= game.paddle1.y
-       and ball.y <= game.paddle1.y + game.paddle1.h)
-   then
-      ball.dir.x = 1
-      game.counter = game.counter + 1
-   else
-      ball.x = ball.x + shiftX
-   end
+   checkPaddleCollision(ball, shiftX, shiftY, game.paddle1)
    
    -- collision with paddle2
    if (ball.x + shiftX + ball.r >= game.paddle2.x 
@@ -128,6 +151,35 @@ function updateBall(dt, ball)
   
 end
 
+function checkWallCollision(ball, shiftX, shiftY)
+   -- wall collision (left|right)
+   if (ball.x >= love.graphics.getWidth() or ball.x <= 0)
+   then
+      -- init()
+   end
+   
+   -- wall collision (up|down)
+   if (ball.y + shiftY - ball.r <= 0 or ball.y + shiftY + ball.r >= love.graphics.getHeight())
+   then
+      ball.dir.y = -ball.dir.y
+   else
+      ball.y = ball.y + shiftY
+   end
+end
+
+function checkPaddleCollision(ball, shiftX, shiftY, paddle)
+   -- in x range?
+   if (ball.x + shiftX - ball.r <= game.paddle1.x + game.paddle1.w
+       and ball.y >= game.paddle1.y
+       and ball.y <= game.paddle1.y + game.paddle1.h)
+   then
+      ball.dir.x = 1
+      game.counter = game.counter + 1
+   else
+      ball.x = ball.x + shiftX
+   end
+end
+
 function love.draw()
    drawCopyright()
    drawCounter()
@@ -138,12 +190,12 @@ end
 
 function drawCopyright()
    love.graphics.setColor(255, 255, 255, 255)
-   love.graphics.print("© 2012 Eraldo Helal", love.graphics.getWidth() / 2, 4)
+   love.graphics.print("© 2012 Eraldo Helal", love.graphics.getWidth() / 2 - 70, 4)
 end
 
 function drawCounter()
    love.graphics.setColor(255, 255, 255, 255)
-   love.graphics.print(tostring(game.counter), love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)  
+   love.graphics.print(tostring(game.counter), love.graphics.getWidth() / 2, 24)  
 end
 
 function drawPaddle(paddle)
