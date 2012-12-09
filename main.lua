@@ -14,8 +14,8 @@ function init()
          x = 0,
          y = 60,
          speed = {
-            x = 400,
-            y = 400,
+            x = 0,
+            y = 0,
          }, 
          color = {255, 0, 0, 255},
          upKey = 'w',
@@ -32,8 +32,8 @@ function init()
          x = love.graphics.getWidth() - 40,
          y = 0,
          speed = {
-            x = 400,
-            y = 400,
+            x = 0,
+            y = 0,
          },
          color = {0, 0, 255, 255},
          upKey = 'up',
@@ -74,43 +74,49 @@ function updatePaddle(dt, paddle)
    
    if love.keyboard.isDown( paddle.upKey )
    then
-      movePaddle(dt, paddle, 'up')
+      -- movePaddle(dt, paddle, 'up')
+      paddle.speed.y = paddle.speed.y - 100
    end
    if
       love.keyboard.isDown( paddle.downKey )
    then
-      movePaddle(dt, paddle, 'down')
+      -- movePaddle(dt, paddle, 'down')
+      paddle.speed.y = paddle.speed.y + 100
    end
    if
       love.keyboard.isDown( paddle.leftKey )
    then
-      movePaddle(dt, paddle, 'left')
+      -- movePaddle(dt, paddle, 'left')
+      paddle.speed.x = paddle.speed.x - 100
    end
    if
       love.keyboard.isDown( paddle.rightKey )
    then
-      movePaddle(dt, paddle, 'right')
+      -- movePaddle(dt, paddle, 'right')
+      paddle.speed.x = paddle.speed.x + 100
    end
+
+   movePaddle(dt, paddle)
    
 end
 
-function movePaddle(dt, paddle, dir)
-   local shiftX = 0
-   local shiftY = 0
+function movePaddle(dt, paddle)
+   local shiftX = paddle.speed.x * dt
+   local shiftY = paddle.speed.y * dt
    
-   if dir == 'up'
-   then
-      shiftY = -(paddle.speed.y * dt)
-   elseif dir == 'down'
-   then
-      shiftY = paddle.speed.y * dt
-   elseif dir == 'left'
-   then
-      shiftX = -(paddle.speed.x * dt)
-   elseif dir == 'right'
-   then
-      shiftX = paddle.speed.x * dt
-   end
+   -- if dir == 'up'
+   -- then
+   --    shiftY = -(paddle.speed.y * dt)
+   -- elseif dir == 'down'
+   -- then
+   --    shiftY = paddle.speed.y * dt
+   -- elseif dir == 'left'
+   -- then
+   --    shiftX = -(paddle.speed.x * dt)
+   -- elseif dir == 'right'
+   -- then
+   --    shiftX = paddle.speed.x * dt
+   -- end
 
    local newX = paddle.x + shiftX
    local newY = paddle.y + shiftY
