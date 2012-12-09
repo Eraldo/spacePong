@@ -1,3 +1,4 @@
+-- Space Pong
 
 function init()
    game = {
