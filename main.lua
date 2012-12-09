@@ -341,7 +341,10 @@ function checkWallCollision(ball)
 end
 
 
-
+function updateHitBallSpeed(ball, paddle)
+   ball.speed.x = ball.speed.x + (paddle.speed.x / 2)
+   ball.speed.y = ball.speed.y + (paddle.speed.y / 2)
+end
 
 function checkPaddleCollision(ball, paddle)
    local paddleCX = paddle.x + paddle.w / 2 -- paddle x center
@@ -365,16 +368,18 @@ function checkPaddleCollision(ball, paddle)
          then
             if ball.speed.y > 0
             then
-               ball.speed.y = ball.speed.y + (paddle.speed.y / 2)
+               updateHitBallSpeed(ball, paddle)
             else
-               ball.speed.y = -ball.speed.y + (paddle.speed.y / 2)
+               ball.speed.y = -ball.speed.y
+               updateHitBallSpeed(ball, paddle)
             end
          else -- hit top
             if ball.speed.y > 0
             then
-               ball.speed.y = -ball.speed.y + (paddle.speed.y / 2)
+               ball.speed.y = -ball.speed.y
+               updateHitBallSpeed(ball, paddle)
             else
-               ball.speed.y = ball.speed.y + (paddle.speed.y / 2)
+               updateHitBallSpeed(ball, paddle)
             end
          end
       end
@@ -387,16 +392,18 @@ function checkPaddleCollision(ball, paddle)
          then
             if ball.speed.x > 0
             then
-               ball.speed.x = ball.speed.x + (paddle.speed.x / 2)
+               updateHitBallSpeed(ball, paddle)
             else
-               ball.speed.x = -ball.speed.x + (paddle.speed.x / 2)
+               ball.speed.x = -ball.speed.x
+               updateHitBallSpeed(ball, paddle)
             end
          else -- hit left
             if ball.speed.x > 0
             then
-               ball.speed.x = -ball.speed.x + (paddle.speed.x / 2)
+               ball.speed.x = -ball.speed.x
+               updateHitBallSpeed(ball, paddle)
             else
-               ball.speed.x = ball.speed.x + (paddle.speed.x / 2)
+               updateHitBallSpeed(ball, paddle)
             end
          end
       end
