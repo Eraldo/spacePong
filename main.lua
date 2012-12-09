@@ -168,36 +168,34 @@ end
 function updatePaddle(dt, paddle)
    -- move paddle according to input
 
-   local accelerationY = 20
-   local accelerationX = 10
+   local accelerationY = 40
+   local accelerationX = 20
 
    if love.keyboard.isDown( paddle.upKey )
    then
-      paddle.speed.y = decelerate(paddle.speed.y)
+      paddle.speed.y = decelerate(paddle.speed.y, accelerationY)
    end
    if
       love.keyboard.isDown( paddle.downKey )
    then
-      paddle.speed.y = accelerate(paddle.speed.y)
+      paddle.speed.y = accelerate(paddle.speed.y, accelerationY)
    end
    if
       love.keyboard.isDown( paddle.leftKey )
    then
-      paddle.speed.x = decelerate(paddle.speed.x)
+      paddle.speed.x = decelerate(paddle.speed.x, accelerationX)
    end
    if
       love.keyboard.isDown( paddle.rightKey )
    then
-      paddle.speed.x = accelerate(paddle.speed.x)
+      paddle.speed.x = accelerate(paddle.speed.x, accelerationX)
    end
 
    movePaddle(dt, paddle)
    
 end
 
-function accelerate(speed)
-   local acceleration = 20
-
+function accelerate(speed, acceleration)
    if speed >= 0
    then
       return speed + acceleration
@@ -206,9 +204,7 @@ function accelerate(speed)
    end
 end
 
-function decelerate(speed)
-   local deceleration = 20
-
+function decelerate(speed, deceleration)
    if speed <= 0
    then
       return speed - deceleration
@@ -255,7 +251,7 @@ function movePaddle(dt, paddle)
 end
 
 function updateBall(dt, ball)
-   local speedCap = 1000
+   local speedCap = 600
 
    checkWallCollision(ball)
    
@@ -343,8 +339,8 @@ end
 
 
 function updateHitBallSpeed(ball, paddle)
-   ball.speed.x = ball.speed.x + (paddle.speed.x / 2)
-   ball.speed.y = ball.speed.y + (paddle.speed.y / 2)
+   ball.speed.x = ball.speed.x + (paddle.speed.x / 4)
+   ball.speed.y = ball.speed.y + (paddle.speed.y / 4)
 end
 
 function checkPaddleCollision(ball, paddle)
@@ -447,7 +443,7 @@ function love.draw()
    drawField()
    drawTitle()
    drawCopyright()
-   drawCounter()
+   -- drawCounter()
    drawScore()
    drawPockets()
    drawPaddle(game.player1.paddle)
