@@ -240,7 +240,8 @@ function checkPaddleCollision(ball, paddle)
             end
          end
       end
-
+   else
+      paddle.active = true
    end
 
    if hit
