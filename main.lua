@@ -165,6 +165,17 @@ function love.update(dt)
    
 end
 
+function morphePaddle(axis)
+   if x and paddle.w > paddle.h then 
+      paddle.w = paddle.w + 1
+      paddle.h = paddle.h - 1
+   end
+   if y and paddle.h > paddle.w then
+      paddle.h = paddle.h + 1
+      paddle.w = paddle.w - 1
+   end
+end
+
 function updatePaddle(dt, paddle)
    -- move paddle according to input
 
@@ -174,21 +185,25 @@ function updatePaddle(dt, paddle)
    if love.keyboard.isDown( paddle.upKey )
    then
       paddle.speed.y = decelerate(paddle.speed.y, accelerationY)
+      morphePaddle(axis)
    end
    if
       love.keyboard.isDown( paddle.downKey )
    then
       paddle.speed.y = accelerate(paddle.speed.y, accelerationY)
+      morphePaddle(axis)
    end
    if
       love.keyboard.isDown( paddle.leftKey )
    then
       paddle.speed.x = decelerate(paddle.speed.x, accelerationX)
+      morphePaddle(axis)
    end
    if
       love.keyboard.isDown( paddle.rightKey )
    then
       paddle.speed.x = accelerate(paddle.speed.x, accelerationX)
+      morphePaddle(axis)
    end
 
    movePaddle(dt, paddle)
