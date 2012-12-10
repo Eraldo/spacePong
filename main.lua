@@ -16,8 +16,9 @@ function init()
          paddle = {
             active = true,
             nr = 1,
-            w = 20,
-            h = 100,
+            baseSize = 50,
+            w = 50,
+            h = 50,
             x = 0,
             y = 0,
             speed = {
@@ -60,8 +61,9 @@ function init()
          paddle = {
             active = true,
             nr = 2,
-            w = 20,
-            h = 100,
+            baseSize = 50,
+            w = 50,
+            h = 50,
             x = 0,
             y =  0,
             speed = {
@@ -165,14 +167,19 @@ function love.update(dt)
    
 end
 
-function morphePaddle(axis)
-   if x and paddle.w > paddle.h then 
-      paddle.w = paddle.w + 1
-      paddle.h = paddle.h - 1
+function morphePaddle(paddle, axis)
+   if axis == "x" and paddle.h > paddle.baseSize / 2 then 
+      paddle.w = paddle.w + 2
+      paddle.x = paddle.x - 1
+      paddle.h = paddle.h - 2
+      paddle.y = paddle.y + 1
+      
    end
-   if y and paddle.h > paddle.w then
-      paddle.h = paddle.h + 1
-      paddle.w = paddle.w - 1
+   if axis == "y" and paddle.w > paddle.baseSize / 2 then
+      paddle.h = paddle.h + 2
+      paddle.y = paddle.y - 1
+      paddle.w = paddle.w - 2
+      paddle.x = paddle.x + 1
    end
 end
 
@@ -184,26 +191,27 @@ function updatePaddle(dt, paddle)
 
    if love.keyboard.isDown( paddle.upKey )
    then
+      morphePaddle(paddle, "y")
       paddle.speed.y = decelerate(paddle.speed.y, accelerationY)
-      morphePaddle("y")
    end
    if
       love.keyboard.isDown( paddle.downKey )
    then
+      morphePaddle(paddle, "y")
       paddle.speed.y = accelerate(paddle.speed.y, accelerationY)
-      morphePaddle("y")
    end
    if
       love.keyboard.isDown( paddle.leftKey )
    then
+      morphePaddle(paddle, "x")
       paddle.speed.x = decelerate(paddle.speed.x, accelerationX)
-      morphePaddle("x")
    end
    if
       love.keyboard.isDown( paddle.rightKey )
    then
+      morphePaddle(paddle, "x")
       paddle.speed.x = accelerate(paddle.speed.x, accelerationX)
-      morphePaddle("x")
+
    end
 
    movePaddle(dt, paddle)
@@ -234,34 +242,63 @@ function movePaddle(dt, paddle)
 
    local newX = paddle.x + shiftX
    local newY = paddle.y + shiftY
+   local boxW = paddle.baseSize + paddle.baseSize/2 + 1
+   local boxH = paddle.baseSize + paddle.baseSize/2 + 1
+   local boxX = paddle.x + paddle.w/2 - (boxW/2)
+   local boxY = paddle.y + paddle.h/2 - (boxH/2)
 
    -- new pos y
-   if newY < game.field.y
+   if boxY < game.field.y
    then 
-      paddle.y = game.field.y
       paddle.speed.y = 0
-   elseif newY > game.field.y + game.field.h - paddle.h
+      paddle.y = paddle.y + (game.field.y - boxY)
+   elseif boxY > game.field.y + game.field.h - boxH
    then
-      paddle.y = game.field.y + game.field.h - paddle.h
       paddle.speed.y = 0
+      paddle.y = paddle.y - (boxY - (game.field.y + game.field.h - boxH))
    else 
       paddle.y = newY
    end
-
+   
    -- new pos x
-   if (paddle.nr == 1 
-       and newX >= game.field.x 
-       and newX <= game.field.x + (game.field.w / 2) - paddle.w)
-   then
-      paddle.x = newX
-   elseif (paddle.nr == 2 
-           and newX >= game.field.x + (game.field.w / 2)
-           and newX <= game.field.x + game.field.w - paddle.w)
-   then
-      paddle.x = newX
-   else
-      paddle.speed.x = 0
+   local leftBound = 0
+   local rightBound = 0
+   if paddle.nr == 1 then 
+      leftBound = game.field.x
+      rightBound = game.field.x + (game.field.w / 2)
+   elseif paddle.nr == 2 then
+      leftBound = game.field.x + (game.field.w / 2)
+      rightBound = game.field.x + game.field.w
    end
+   print(paddle.x, paddle.w, boxX, boxW, leftBound, rightBound)
+   if boxX < leftBound
+   then 
+      paddle.speed.x = 0
+      paddle.x = paddle.x + (leftBound - boxX)
+   elseif boxX > rightBound - boxW
+   then
+      paddle.speed.x = 0
+      paddle.x = paddle.x - (boxX + boxW - rightBound) -- boxX - (rightBound - boxW)
+   else 
+      paddle.x = newX
+   end
+   
+
+
+   -- -- new pos x
+   -- if (paddle.nr == 1 
+   --     and boxX >= game.field.x 
+   --     and boxX <= game.field.x + (game.field.w / 2) - boxW)
+   -- then
+   --    paddle.x = newX
+   -- elseif (paddle.nr == 2 
+   --         and boxX >= game.field.x + (game.field.w / 2)
+   --         and boxX <= game.field.x + game.field.w - boxW)
+   -- then
+   --    paddle.x = newX
+   -- else
+   --    paddle.speed.x = 0
+   -- end
 
 end
 
